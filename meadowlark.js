@@ -7,21 +7,94 @@ app.use(express.static(__dirname + '/public' ));
 
 //핸들바 뷰 엔진 설정
 //defaultLayout은 따로 명시하지 않는다면 모든 뷰에서 이 레이아웃을 쓰겠다는 의미이다.
-var handlebars=require('express-handlebars').create({defaultLayout : 'main'});
+var handlebars=require('express-handlebars').create({
+	defaultLayout : 'main',
+	helpers :{
+		section : function(name, options){
+			if(!this.sections)this.sections={};
+			this._sections[name]=options.fn(this);
+			return null;
+		}
+	}
+});
 app.engine('handlebars', handlebars.engine);
 app.set('view engine', 'handlebars');
 
+//페이지 테스트 코드
+app.use(function(req, res, next){
+	res.locals.showTests=app.get('env') !== 'production' && req.query.test === '1';
+	next();
+});
+
+//파셜 관련 함수
+function getWeatherData(){
+	return{
+		locations:[
+			{
+				name : 'Portland',
+				forecastUrl : 'http://www.wunderground.com/US/OR/Portland.html',
+				iconUrl : 'http://icons-ak.wxug.com/i/c/k/cloudy.gif',
+				weather : 'Overcast',
+				temp : '54.1 F (12.3 C)'
+			},
+			{
+				name : 'Bend',
+				forecastUrl : 'http://www.wunderground.com/US/OR/Bend.html',
+				iconUrl : 'http://icons-ak.wxug.com/i/c/k/partlycloudy.gif',
+				weather : 'Partly Cloudy',
+				temp : '55.0 F (12.8 C)'
+			},
+			{
+				name : 'Manzanita',
+				forecastUrl : 'http://www.wunderground.com/US/OR/Manzanita.html',
+				iconUrl : 'http://icons-ak.wxug.com/i/c/k/rain.gif',
+				weather : 'Light Rain',
+				temp : '55.0 F (12.8 C)'
+			}
+		]
+	};
+}
+app.use(function(req, res ,next){
+	if(!res.locals.partials) res.locals.partials={};
+	res.locals.partials.weatherContext=getWeatherData();
+	next();
+});
+
+//라우트
 app.get('/', function(req, res){
 	res.render('home');
 });
 app.get('/about', function(req, res){
-	res.render('about', {fortune : fortune.getFortune()});
+	res.render('about', {
+		fortune : fortune.getFortune(),
+		pageTestScript : '/qa/tests-about.js'
+	});
 });
+app.get('/tours/hood-river', function(req, res){
+	res.render('tours/hood-river');
+});
+app.get('/tours/oregon-coast', function(req, res){
+	res.render('tours/hood-river');
+});
+app.get('/tours/request-group-rate', function(req, res){
+	res.render('tours/request-group-rate');
+});
+app.get('/headers', function(req, res){
+	res.set('Content-Type', 'text/plain');
+	var s='';
+	for(var name in req.headers){
+		s+=name+': '+req.headers[name]+'\n';
+	}
+	res.send(s);
+});
+app.get('/download',function(req, res){
+	res.download(__dirname+'/public/img/logo.png')
+})
 
 //커스텀 404 페이지
 app.use(function(req, res, next){
 	res.status(404);
-	res.render('404')
+	res.render('404');
 });
 
 //커스텀 500 페이지
