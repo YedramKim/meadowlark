@@ -1,9 +1,16 @@
 var express=require('express');
 var fortune=require('./lib/fortune.js');
+var path=require('path');
+//파비콘
+var favicon=require('express-favicon');
 
 var app=express();
 app.set('port', process.env.PORT || 80);
 app.use(express.static(__dirname + '/public' ));
+//파비콘 설정
+app.use(favicon(path.join(__dirname,'public','img','favicon.ico')));
+//post요청 설정
+app.use(require('body-parser').urlencoded({extended : true}));
 
 //핸들바 뷰 엔진 설정
 //defaultLayout은 따로 명시하지 않는다면 모든 뷰에서 이 레이아웃을 쓰겠다는 의미이다.
@@ -64,6 +71,9 @@ app.use(function(req, res ,next){
 app.get('/', function(req, res){
 	res.render('home');
 });
+app.get('/jquery', function(req, res){
+	res.render('jquery-test');
+});
 app.get('/about', function(req, res){
 	res.render('about', {
 		fortune : fortune.getFortune(),
@@ -87,9 +97,35 @@ app.get('/headers', function(req, res){
 	}
 	res.send(s);
 });
-app.get('/download',function(req, res){
-	res.download(__dirname+'/public/img/logo.png')
+//클라이언트 핸들바 관련
+app.get('/nursery-rhyme', function(req, res){
+	res.render('nursery-rhyme');
 })
+app.get('/data/nursery-rhyme', function(req, res){
+	res.json({
+		animal : 'spuirrel',
+		bodyPart : 'tail',
+		adjective : 'bushy',
+		noun : 'heck'
+	});
+});
+
+//post 폼 처리
+app.get('/newsletter', function(req, res){
+	res.render('newsletter',{
+		csrf : 'CSRF token goes here'
+	});
+});
+
+app.post('/process', function(req, res){
+	//req.xhr: 요청이 ajax요청일 경우 true
+	//req.accepts:반환하기 가장 적절한 응답 타입을 결정합니다.
+	if(req.xhr || req.accepts('json,html') === 'json'){
+		res.send({success:true});
+	}else{
+		res.redirect(303, '/thank-you');
+	}
+});
 
 //커스텀 404 페이지
 app.use(function(req, res, next){

@@ -1,0 +1,40 @@
+{{#section 'head'}}
+	<!-- we want Google to ignore this page -->
+	<script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/1.3.0/handlebars.min.js"></script>
+	{{!중괄호 중 하나는 이스케이프해야 한다. 그렇지 않으면 서버 쪽 뷰 처리에서 중괄호를 교체하려 할 것이다.}}
+	<script type="text/x-handlebars-template" id="nurseryRhymeTemplate">
+	Marry had a little <b>\{{animal}}</b>, its <b>\{{bodyPart}}</b> was <b>\{{adjective}}</b> as <b>\{{noun}}</b>.
+	</script>
+{{/section}}
+
+<h1>Test Page</h1>
+<p>We're testing some jQuery stuff.</p>
+<div id="nurseryRhyme">
+	Click a button....
+</div>
+<hr>
+<button id="btnNurseryRhyme">Benerate nursery rhyme</button>
+<button id="btnNurseryRhymeAjax">Benerate nursery rhyme from AJAX</button>
+{{#section 'jQuery'}}
+<script>
+$(function(){
+var template=Handlebars.compile($('#nurseryRhymeTemplate').html());
+var $nurseryRhyme=$('#nurseryRhyme');
+$('#btnNurseryRhyme').on('click', function(e){
+	e.preventDefault();
+	$nurseryRhyme.html(template({
+		animal : 'basilisk',
+		bodyPart : 'tail',
+		adjective : 'sharp',
+		noun : 'a needle'
+	}));
+});
+$('#btnNurseryRhymeAjax').on('click', function(e){
+	e.preventDefault();
+	$.getJSON('data/nursery-rhyme',function(data){
+		$nurseryRhyme.html(template(data));		
+	});
+});
+});
+</script>
+{{/section}}
