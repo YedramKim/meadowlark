@@ -1,14 +1,17 @@
 var express=require('express');
 var fortune=require('./lib/fortune.js');
 var path=require('path');
+
 //파비콘
 var favicon=require('express-favicon');
 
 var app=express();
 app.set('port', process.env.PORT || 80);
 app.use(express.static(__dirname + '/public' ));
+
 //파비콘 설정
-app.use(favicon(path.join(__dirname,'public','img','favicon.ico')));
+//app.use(favicon(path.join(__dirname,'public','img','favicon.ico')));
+
 //post요청 설정
 app.use(require('body-parser').urlencoded({extended : true}));
 
@@ -67,6 +70,28 @@ app.use(function(req, res ,next){
 	next();
 });
 
+//파일 업로드
+var formidable=require('formidable');
+app.get('/contest/vacation-photo', function(req, res){
+	var now=new Date();
+	res.render('contest/vacation-photo', {
+		year : now.getFullYear(),
+		month : now.getMonth()
+	});
+});
+
+app.post('/contest/vacation-photo/:year/:month', function(req, res){
+	var form=new formidable.IncomingForm();
+	form.parse(req, function(err, fields, files){
+		if(err) return res.redirect(303, '/error');
+		console.log('received fields :');
+		console.log(fields);
+		console.log('received files :');
+		console.log(files);
+		res.redirect(303, '/thank-you');
+	});
+});
+
 //라우트
 app.get('/', function(req, res){
 	res.render('home');
@@ -110,13 +135,17 @@ app.get('/data/nursery-rhyme', function(req, res){
 	});
 });
 
-//post 폼 처리
+app.get('/thank-you', function(req, res){
+	res.render('thank-you');
+})
+
 app.get('/newsletter', function(req, res){
 	res.render('newsletter',{
 		csrf : 'CSRF token goes here'
 	});
 });
 
+//post 폼 처리
 app.post('/process', function(req, res){
 	//req.xhr: 요청이 ajax요청일 경우 true
 	//req.accepts:반환하기 가장 적절한 응답 타입을 결정합니다.
@@ -125,6 +154,24 @@ app.post('/process', function(req, res){
 	}else{
 		res.redirect(303, '/thank-you');
 	}
+});
+
+app.get('/error', function(req, res){
+	res.render('error');
+});
+
+//제이쿼리 파일 업로드
+var jqupload=require('jquery-file-upload-middleware');
+app.use('/upload', function(req, res, next){
+	var now=Date.now();
+	jqupload.fileHandler({
+		uploadDir:function(){
+			return __dirname+'/public/uploads/'+now;
+		},
+		uploadUrl:function(){
+			return '/uploads/'+now;
+		}
+	})(req, res, next);
 });
 
 //커스텀 404 페이지
