@@ -9,11 +9,18 @@ var app=express();
 app.set('port', process.env.PORT || 80);
 app.use(express.static(__dirname + '/public' ));
 
+//저장소 인증서
+var credentials=require('./credentials.js');
+
 //파비콘 설정
 //app.use(favicon(path.join(__dirname,'public','img','favicon.ico')));
 
 //post요청 설정
 app.use(require('body-parser').urlencoded({extended : true}));
+
+//쿠키 사용설정
+//쿠키를 지울 때는 res.clearCookie('쿠키 이름')을 사용한다.
+app.use(require('cookie-parser')(credentials.cookieSecret));
 
 //핸들바 뷰 엔진 설정
 //defaultLayout은 따로 명시하지 않는다면 모든 뷰에서 이 레이아웃을 쓰겠다는 의미이다.
@@ -32,6 +39,7 @@ app.set('view engine', 'handlebars');
 
 //페이지 테스트 코드
 app.use(function(req, res, next){
+	res.cookie('cookie', 'cookie');
 	res.locals.showTests=app.get('env') !== 'production' && req.query.test === '1';
 	next();
 });
