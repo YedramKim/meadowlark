@@ -21,6 +21,13 @@ app.use(require('body-parser').urlencoded({extended : true}));
 //쿠키 사용설정
 //쿠키를 지울 때는 res.clearCookie('쿠키 이름')을 사용한다.
 app.use(require('cookie-parser')(credentials.cookieSecret));
+//세션 연결
+app.use(require('express-session')({
+	resave : false,
+	saveUninitialized : false,
+	secret : credentials.cookieSecret
+}));
+
 
 //핸들바 뷰 엔진 설정
 //defaultLayout은 따로 명시하지 않는다면 모든 뷰에서 이 레이아웃을 쓰겠다는 의미이다.
