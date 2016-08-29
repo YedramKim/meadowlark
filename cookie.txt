@@ -1,0 +1,11 @@
+쿠키 사용방법 : app.use(require('cookie-parser')());
+쿠키 등록 : res.cookie('쿠키 이름', '쿠키 값'[, {쿠키 설정 객체});
+	쿠키 설정 객체
+	domain : 쿠키가 어느 도메인에 연결되는지 정합니다.
+	path : 쿠키가 적용될 경로를 지정. 기본값은 /로 경로에 /foo를 쓰면 /foo, /foo/bar 등에 모두 적용 됩니다.
+	maxAge : 클라이언트가 쿠키를 삭제하기 전에 얼마나 오래 보관해야 하는지 밀리초 단위로 지정합니다. (생략하면 브라우저를 닫을 때 쿠키가 삭제)
+	secure : 쿠키를 보안 연결에서만 보내도록 지정
+	httpOnly : true로 설정하면 서버에서만 쿠키를 수정할 수 있습니다.
+	signed : true로 설정하면 해당쿠키는 서명되어 req.signedCookie에 접근 가능해진다.
+쿠키 사용 : req.cookies.쿠키이름;
+쿠키 삭제 : res.clearCookie(쿠키 이름);
